@@ -1,0 +1,31 @@
+version: '2.4'  
+# Using compose v2 since it supports single pc deploys better than v3. Can revisit for swarm deploys.
+services:
+  db:
+    container_name: db
+    image: postgres
+    platform: ${PLATFORM}
+    stop_grace_period: 1m
+    ports:
+      - "${DB_PORT}:${DB_PORT}"
+    expose:
+      - "${DB_PORT}"
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - pg:/var/lib/postgresql/data
+  dts-node:
+    container_name: dts-node
+    image: dts-node
+    expose:
+      - "${APP_PORT}"
+    ports:
+      - "${APP_PORT}:${APP_PORT}"
+    depends_on:
+      - db
+    command: ["npm", "run","prod"]
+
+volumes:
+  pg:
